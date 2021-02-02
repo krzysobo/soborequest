@@ -74,3 +74,11 @@ For now, please just take a look at the code starting with src/test/test_request
 
 # Tested and tests passing on:
 ```MacOS Catalina 10.15.6```
+
+
+# TODOs
+    - PUT method - it's a bit tricky but I've found out how to handle it
+    - authentication
+    - uploading/downloading of files
+    - handling forms in some easy way
+    
