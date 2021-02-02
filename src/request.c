@@ -72,7 +72,7 @@ int set_headers(CURL *curl, char **headers,
  * @param  *auth_data: 
  * @param  *cb_data: 
  * @param  **resp: ResponseData if retval==CURLE_OK, NULL otherwise
- *         (do not try to display the members of NULL, because it will cause segmentation fault!) 
+ *         (do not try to display the  members of NULL, because it will cause segmentation fault!) 
  * @retval 
  */
 int make_request(struct ConnData *cd, char *data,
@@ -81,6 +81,9 @@ int make_request(struct ConnData *cd, char *data,
 {
     CURL *curl = curl_easy_init();
     CURLcode res;
+    char *resp_cont_type;
+    long resp_code;
+
     struct curl_slist *headers_list = NULL;
     struct curl_slist *headers_temp = NULL;
     // char *resp_method = NULL;
@@ -217,6 +220,16 @@ int make_request(struct ConnData *cd, char *data,
         return res;
 
     res = curl_easy_perform(curl);
+    // TODO: implemented only in 7.72.0 and later 
+    // https://curl.se/libcurl/c/CURLINFO_EFFECTIVE_METHOD.html
+    // curl_easy_getinfo(curl, CURLINFO_EFFECTIVE_METHOD, &resp_method);
+    // curl_easy_getinfo(curl, CURLINFO_EFFECTIVE_URL, &resp_url);
+    curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &resp_code);
+    curl_easy_getinfo(curl, CURLINFO_CONTENT_TYPE, &resp_cont_type);
+
+    *resp = make_response_data(resp_code, chunk_write.size, 
+        chunk_write.response, resp_cont_type);
+
     if(headers_temp != NULL)
         curl_slist_free_all(headers_temp);
     
@@ -225,17 +238,6 @@ int make_request(struct ConnData *cd, char *data,
 
     if (!check_res_ok(res))
         return res;
-
-
-    // TODO: implemented only in 7.72.0 and later https://curl.se/libcurl/c/CURLINFO_EFFECTIVE_METHOD.html
-    // curl_easy_getinfo(curl, CURLINFO_EFFECTIVE_METHOD, &resp_method); 
-    // curl_easy_getinfo(curl, CURLINFO_EFFECTIVE_URL, &resp_url);
-    char *resp_cont_type;
-    long resp_code;
-    curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &resp_code);
-    curl_easy_getinfo(curl, CURLINFO_CONTENT_TYPE, &resp_cont_type);
-  
-    *resp = make_response_data(resp_code, chunk_write.size, chunk_write.response, resp_cont_type);
 
     return CURLE_OK;
 }
