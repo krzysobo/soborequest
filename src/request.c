@@ -28,6 +28,16 @@
 #include "soborequest/request_cb_functions.h"
 
 
+/**
+ * @brief  
+ * @note   
+ * @param  *curl: 
+ * @param  **headers: 
+ * @param  num_headers: 
+ * @param  *headers_list: 
+ * @param  *headers_temp: 
+ * @retval 
+ */
 int set_headers(CURL *curl, char **headers, 
     int num_headers,
     struct curl_slist *headers_list, 
@@ -53,7 +63,19 @@ int set_headers(CURL *curl, char **headers,
 }
 
 
-int make_request(char *url, enum METHOD method, char *data, long port,
+/**
+ * @brief  makes a request
+ * @note   
+ * @param  *cd: 
+ * @param  *data: 
+ * @param  *header_data: 
+ * @param  *auth_data: 
+ * @param  *cb_data: 
+ * @param  **resp: ResponseData if retval==CURLE_OK, NULL otherwise
+ *         (do not try to display the members of NULL, because it will cause segmentation fault!) 
+ * @retval 
+ */
+int make_request(struct ConnData *cd, char *data,
     struct HeaderData *header_data, struct AuthData *auth_data,
     struct CallbackData *cb_data, struct ResponseData **resp)
 {
@@ -68,40 +90,40 @@ int make_request(char *url, enum METHOD method, char *data, long port,
 
     init_memory_chunk(&chunk_write);
     init_memory_chunk(&chunk_read);
-
+    
 
     if (curl == NULL) {  // something went wrong, don't go further
         return CURLE_FAILED_INIT;  // I am re-using the codes from CURL
     }
-    if (!method) {
+    if (!cd->method) {
         return CURLE_BAD_FUNCTION_ARGUMENT;
     }
 
-    res = curl_easy_setopt(curl, CURLOPT_URL, url);
+    res = curl_easy_setopt(curl, CURLOPT_URL, cd->url);
     if (!check_res_ok(res))
         return res;
 
-    if (port) {
-        res = curl_easy_setopt(curl, CURLOPT_PORT, port);
+    if (cd->port) {
+        res = curl_easy_setopt(curl, CURLOPT_PORT, cd->port);
         if (!check_res_ok(res))
             return res;
     }
 
     if (header_data != NULL ) {
         if (header_data->follow_redirects) {
-            res = curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 
+            res = curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION,
                 header_data->follow_redirects);
             if (!check_res_ok(res))
                 return res;
         }
         if (header_data->use_autoreferer) {
-            res = curl_easy_setopt(curl, CURLOPT_AUTOREFERER, 
+            res = curl_easy_setopt(curl, CURLOPT_AUTOREFERER,
                 header_data->use_autoreferer);
             if (!check_res_ok(res))
                 return res;
         } else if ((header_data->referer != NULL) && 
                 (strlen(header_data->referer))) {
-            res = curl_easy_setopt(curl, CURLOPT_REFERER, 
+            res = curl_easy_setopt(curl, CURLOPT_REFERER,
                 header_data->referer);
             if (!check_res_ok(res))
                 return res;
@@ -117,14 +139,14 @@ int make_request(char *url, enum METHOD method, char *data, long port,
 
     if (auth_data != NULL) {
         if (auth_data->auth_type) {
-            res = curl_easy_setopt(curl, CURLOPT_HTTPAUTH, 
+            res = curl_easy_setopt(curl, CURLOPT_HTTPAUTH,
                 (long)auth_data->auth_type);
             if (!check_res_ok(res))
                 return res;
         }
 
         if (auth_data->user_pwd != NULL) {
-            res = curl_easy_setopt(curl, CURLOPT_USERPWD, 
+            res = curl_easy_setopt(curl, CURLOPT_USERPWD,
                 auth_data->user_pwd);
             if (!check_res_ok(res))
                 return res;
@@ -132,7 +154,7 @@ int make_request(char *url, enum METHOD method, char *data, long port,
     }
 
     if ((cb_data != NULL) && (cb_data->write_function != NULL)) {
-        res = curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, 
+        res = curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION,
             cb_data->write_function);
         if (!check_res_ok(res))
             return res;
@@ -157,12 +179,10 @@ int make_request(char *url, enum METHOD method, char *data, long port,
         if (!check_res_ok(res))
             return res;
     }
-
-
     if (!check_res_ok(res))
         return res;
 
-    switch (method) {
+    switch (cd->method) {
         case METHOD_GET:
             res = set_method_get(curl);
             break;
@@ -197,8 +217,12 @@ int make_request(char *url, enum METHOD method, char *data, long port,
         return res;
 
     res = curl_easy_perform(curl);
-    curl_slist_free_all(headers_temp);
-    curl_slist_free_all(headers_list);
+    if(headers_temp != NULL)
+        curl_slist_free_all(headers_temp);
+    
+    if(headers_list != NULL)
+        curl_slist_free_all(headers_list);
+
     if (!check_res_ok(res))
         return res;
 
@@ -206,29 +230,12 @@ int make_request(char *url, enum METHOD method, char *data, long port,
     // TODO: implemented only in 7.72.0 and later https://curl.se/libcurl/c/CURLINFO_EFFECTIVE_METHOD.html
     // curl_easy_getinfo(curl, CURLINFO_EFFECTIVE_METHOD, &resp_method); 
     // curl_easy_getinfo(curl, CURLINFO_EFFECTIVE_URL, &resp_url);
-
     char *resp_cont_type;
     long resp_code;
-
-
     curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &resp_code);
     curl_easy_getinfo(curl, CURLINFO_CONTENT_TYPE, &resp_cont_type);
   
-    // struct ResponseData *resp_in;
     *resp = make_response_data(resp_code, chunk_write.size, chunk_write.response, resp_cont_type);
-    // *resp = resp_in;
-    // printf("\nRESPC CODE: %lu SIZE: %lu \n", resp_code, chunk_write.size);
-    // printf("\nRESP_IN CODE: %lu SIZE: %lu CONT: %s TYPE: %s \n", 
-    //     resp_in->status_code, resp_in->size, resp_in->contents, 
-    //     resp_in->content_type);
-
-    // // resp_cont_type is accidentally cleared after cleanup. Don't use it after curl_easy_cleanup,
-    // // and if anything, go for memcpy
-    // resp = resp_in;
-    // curl_easy_cleanup(curl);
-    // printf("\nAFTER CLEANUP RESP_IN CODE: %lu SIZE: %lu CONT: %s TYPE: %s \n",
-    //     resp->status_code, resp->size, resp->contents, 
-    //     resp->content_type);
 
     return CURLE_OK;
 }

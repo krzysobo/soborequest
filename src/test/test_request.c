@@ -55,31 +55,65 @@ void test_mass(char *url, long port, enum METHOD m, int num,
     int i = 0;
 
     struct ResponseData *resp;
-    // resp = calloc(1, sizeof (struct ResponseData *));
+    struct ConnData cd = {
+        .url = url,
+        .port = port,
+        .method = m
+    };
+    int num_errors = 0;
 
-    for(i=0; i < num; i++) {
-        res = make_request(url, m, data, port, NULL, NULL, NULL, &resp);
-        printf("\n\nMAKE_REQUEST RES: %d", res);
+    for(i=0; i < num; i++) {  
+        printf("\nMaking request %d/%d to: %s port: %lu method: %d (%s)...", 
+            i + 1, num, cd.url, cd.port, cd.method, methodName(cd.method));
+        res = make_request(&cd, data, NULL, NULL, NULL, &resp);
+        
+        // I don't want to use assert here, because I don't want the program to quit on the
+        // first failed conneciton. I'd rather like to gather the info about how often it happens.
+        if (res == CURLE_OK) {
+            printf(" - OK!\n");
+        } else {
+            printf(" - FAILED! Error Code: %d. \n", res);
+            num_errors++;
+            continue;
+        }       
+
         printf("\n\n TEST=> RESP CODE %lu size: %lu CONTENTS: %s "
-               "CONTENT-TYPE: %s\n",
+            "CONTENT-TYPE: %s\n",
             resp->status_code, resp->size, resp->contents, resp->content_type
         );
-        continue;
+
         if(test_contents != NULL) {
             printf("\nTESTING: RESP cnt: '%s'\nTEST cnt: '%s'. Is equal?", 
                 resp->contents, test_contents);
-            assert(strcmp(resp->contents, test_contents) == 0);
-            printf(" -- YES, OK! \n");
+
+            if(strcmp(resp->contents, test_contents) == 0) {
+                printf(" -- YES, OK! \n");    
+            } else {
+                printf(" -- FAILED! \n");
+                num_errors++;
+                continue;
+            }
         }
         if(test_ct != NULL) {
             printf("\nTESTING: RESP ct: '%s'\nTEST ct: '%s'. Is equal?", 
                 resp->content_type, test_ct);
-            assert(strcmp(resp->content_type, test_ct) == 0);
-            printf(" -- YES, OK! \n");
+            if(strcmp(resp->content_type, test_ct) == 0) {
+                printf(" -- YES, OK! \n");    
+            } else {
+                printf(" -- FAILED! \n");
+                num_errors++;
+                continue;
+            }
         }
     }
-}
 
+    if (num_errors > 0) {
+        printf("\nThere were %d error(s) out of %d tests.\n", num_errors, num);
+    } else {
+        printf("\nAll %d tests have been performed successfully.\n", num);
+    }
+    printf("================================================\n\n");
+}
 
 
 int main(int argc, char **argv)
@@ -89,7 +123,7 @@ int main(int argc, char **argv)
     char *url = (argc > 0 && argv[1])?argv[1]: "http://127.0.0.1";
     status = 0;
     long port = 5000;
-    int num = 1000;    
+    int num = 10;    
     printf("\ntest_request testing has been started... \n\n");
     
     test_mass(url, port, METHOD_GET, num, "\"GET IS OK\"\n", NULL);

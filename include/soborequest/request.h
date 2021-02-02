@@ -25,6 +25,63 @@
 
 #ifndef REQ_H
 #define REQ_H
+
+
+/**
+ * @brief  METHODS handled by make_request (not all of them implemented yet! 
+ *         See request.c:make_request for details)
+ * @note   
+ * @retval None
+ */
+enum METHOD {
+    METHOD_GET = 1,
+    METHOD_POST,
+    METHOD_PUT,
+    METHOD_PATCH, 
+    METHOD_DELETE,
+
+    METHOD_HEAD,
+    METHOD_CONNECT,
+    METHOD_OPTIONS,
+    METHOD_TRACE
+};
+
+
+/**
+ * @brief  returns the name of a HTTP method
+ * @note   
+ * @param  m: 
+ * @retval 
+ */
+static inline const char * methodName(enum METHOD m)
+{
+    static const char *names[] = {
+        "GET", "POST", "PUT", "PATCH", "DELETE", "HEAD", 
+        "CONNECT", "OPTIONS", "TRACE"};
+    static int size_names = 9;
+    int m_ob0 = m - 1;
+    if(m_ob0 < size_names) {
+        return names[m_ob0];
+    }
+
+    return "-n/a-";
+}
+
+
+/**
+ * @brief  the last METHOD handled, used for checking/validation
+ * @note   
+ * @retval None
+ */
+
+
+struct ConnData {
+    char *url;
+    long port;
+    enum METHOD method;
+};
+
+
 struct HeaderData {
     /**
      * @brief  optional headers - array of strings
@@ -90,33 +147,8 @@ enum RES {
     RES_NOT_IMPLEMENTED_YET = -100,
 };
 
-/**
- * @brief  METHODS handled by make_request (not all of them implemented yet! 
- *         See request.c:make_request for details)
- * @note   
- * @retval None
- */
-enum METHOD{
-    METHOD_GET = 1,
-    METHOD_POST,
-    METHOD_PUT,
-    METHOD_PATCH, 
-    METHOD_DELETE,
 
-    METHOD_HEAD,
-    METHOD_CONNECT,
-    METHOD_OPTIONS,
-    METHOD_TRACE
-};
-
-/**
- * @brief  the last METHOD handled, used for checking/validation
- * @note   
- * @retval None
- */
-
-
-int make_request(char *url, enum METHOD method, char *data, long port,
+int make_request(struct ConnData *cd, char *data,
     struct HeaderData *header_data, struct AuthData *auth_data,
     struct CallbackData *cb_data, struct ResponseData **resp);
 
