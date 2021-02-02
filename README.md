@@ -73,6 +73,7 @@ TODO. Will be written ASAP.
 For now, please just take a look at the code starting with src/test/test_request.c 
 
 # Tested and tests passing on:
+```ArchLinux 5.10.7-arch1-1```
 ```MacOS Catalina 10.15.6```
 
 
@@ -81,4 +82,3 @@ For now, please just take a look at the code starting with src/test/test_request
     - authentication
     - uploading/downloading of files
     - handling forms in some easy way
-    
