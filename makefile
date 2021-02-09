@@ -2,21 +2,22 @@
 ## Common variables
 ## AR, CXX, CC, AS, CXXFLAGS and CFLAGS can be overriden using an environment variables
 ##
-AR                     := /usr/bin/ar rcu
-CXX                    := /usr/bin/g++
+AR                       := /usr/bin/ar rcu
+CXX                      := /usr/bin/g++
 # can be set in the env. vars, ie. export CC='ccccc'
-CC                     := /usr/bin/gcc
-CXXFLAGS               :=  -g -O0 -Wall -Werror
-CFLAGS                 :=  -g -O0 -Wall -Werror -std=c89 -pedantic
-ASFLAGS                := 
-AS                     := /usr/bin/as
+CC                       := /usr/bin/gcc
+CXXFLAGS                 :=  -g -O0 -Wall -Werror
+CFLAGS                   :=  -g -O0 -Wall -Werror -std=c89 -pedantic
+ASFLAGS                  := 
+AS                       := /usr/bin/as
 # can be set in the env. vars, ie. export TARGET_PATH='xxxxx'
-TARGET_PATH            ?= 'bin'
+TARGET_PATH              ?= 'bin'
 
 SOBOREQUEST_INCLUDE_PATH ?= '/usr/local/share/soborequest'
 SOBOREQUEST_LIB_PATH     ?= '/usr/local/lib/soborequest'
-SOBOLOGGER_INCLUDE_PATH ?= '/usr/local/share'   # upper directory - always for using in other projects
-SOBOLOGGER_LIB_PATH     ?= '/usr/local/lib/sobologger'
+SOBO_COMMON_INCLUDE_PATH ?= '/usr/local/share'   # upper directory - always for using in other projects
+SOBOLOGGER_LIB_PATH      ?= '/usr/local/lib/sobologger'
+SOBOUTILS_LIB_PATH       ?= '/usr/local/lib/soboutils'
 
 .PHONY: clean
 
@@ -54,7 +55,7 @@ socket_functions: src/socket_functions.c
 	$(CC) $(CFLAGS) -fpic -o $(TARGET_PATH)/socket_functions.o \
 	-c src/socket_functions.c \
 	-I include \
-	-I $(SOBOLOGGER_INCLUDE_PATH)
+	-I $(SOBO_COMMON_INCLUDE_PATH)
 
 	chmod 777 $(TARGET_PATH)/socket_functions.o
 
@@ -82,7 +83,7 @@ testsocket: src/test/test_socket.c
 	$(SOBOLOGGER_LIB_PATH)/libsobologger.a \
 	-I include \
 	-I $(SOBOREQUEST_INCLUDE_PATH) \
-	-I $(SOBOLOGGER_INCLUDE_PATH) \
+	-I $(SOBO_COMMON_INCLUDE_PATH) \
 	-lcurl
 
 

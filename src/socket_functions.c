@@ -31,13 +31,13 @@
 #include <arpa/inet.h>
 #include "sobologger/logger.h"
 #include "soborequest/socket_functions.h"
+#include "soboutils/utils_string.h"
 
 
 struct timeval timeout_read = {0, 700000};
 struct timeval timeout_read2 = {0, 10};
 struct timeval timeout_write = {10, 0};
 
-int add_to_string(char **str, size_t *str_size, char *part);
 
 
 
@@ -128,30 +128,6 @@ int send_all_data(int sockfd, char *buf, int *len)
 
     return (n == -1)? -1: 0; /* return -1 on failure, 0 on success */
 }
-
-
-int add_to_string(char **str, size_t *str_size, char *part)
-{
-    char *str_tmp;
-    if (*str == NULL) {
-        return -1;
-    }
-
-    if (strlen(*str) + strlen(part) > *str_size ) {
-        *str_size += strlen(part);
-        str_tmp = realloc(*str, *str_size + 1);
-        if (str_tmp == NULL) {
-            return -1;
-        }
-        *str = str_tmp;
-    }
-    strcat(*str, part);
-
-    return 0;
-}
-
-
-
 
 
 int read_all_data(int sockfd, char **msg_ret, char *term_seq)
