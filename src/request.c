@@ -1,22 +1,23 @@
-// Copyright (c) 2020-2021 Krzysztof Sobolewski <krzysztof.sobolewski@gmail.com>
+/*  
+*  Copyright (c) 2020-2021 Krzysztof Sobolewski <krzysztof.sobolewski@gmail.com>
+*  Permission is hereby granted, free of charge, to any person obtaining a copy
+*  of this software and associated documentation files (the "Software"), to deal
+*  in the Software without restriction, including without limitation the rights
+*  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+*  copies of the Software, and to permit persons to whom the Software is
+*  furnished to do so, subject to the following conditions:
 
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files (the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions:
+*  The above copyright notice and this permission notice shall be included in all
+*  copies or substantial portions of the Software.
 
-// The above copyright notice and this permission notice shall be included in all
-// copies or substantial portions of the Software.
-
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-// SOFTWARE.
+*  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+*  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+*  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+*  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+*  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+*  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+*  SOFTWARE.
+*/
 
 
 #include <stdio.h>
@@ -38,6 +39,23 @@
  * @param  *headers_temp: 
  * @retval 
  */
+
+
+const char * methodName(enum METHOD m)
+{
+    static const char *names[] = {
+        "GET", "POST", "PUT", "PATCH", "DELETE", "HEAD", 
+        "CONNECT", "OPTIONS", "TRACE"};
+    static int size_names = 9;
+    int m_ob0 = m - 1;
+    if(m_ob0 < size_names) {
+        return names[m_ob0];
+    }
+
+    return "-n/a-";
+}
+
+
 int set_headers(CURL *curl, char **headers, 
     int num_headers,
     struct curl_slist *headers_list, 
@@ -86,8 +104,8 @@ int make_request(struct ConnData *cd, char *data,
 
     struct curl_slist *headers_list = NULL;
     struct curl_slist *headers_temp = NULL;
-    // char *resp_method = NULL;
-    // char *resp_url = NULL;
+    /* char *resp_method = NULL; */
+    /* char *resp_url = NULL; */
     struct Memory chunk_write;
     struct Memory chunk_read;
 
@@ -95,8 +113,8 @@ int make_request(struct ConnData *cd, char *data,
     init_memory_chunk(&chunk_read);
     
 
-    if (curl == NULL) {  // something went wrong, don't go further
-        return CURLE_FAILED_INIT;  // I am re-using the codes from CURL
+    if (curl == NULL) {  /* something went wrong, don't go further */
+        return CURLE_FAILED_INIT;  /* re-using the codes from CURL */
     }
     if (!cd->method) {
         return CURLE_BAD_FUNCTION_ARGUMENT;
@@ -141,16 +159,14 @@ int make_request(struct ConnData *cd, char *data,
     }
 
     if (auth_data != NULL) {
-        if (auth_data->auth_type) {
-            res = curl_easy_setopt(curl, CURLOPT_HTTPAUTH,
-                (long)auth_data->auth_type);
+        if ((auth_data->user != NULL) && (auth_data->password != NULL)) {
+            res = curl_easy_setopt(curl, CURLOPT_USERNAME,
+                auth_data->user);
             if (!check_res_ok(res))
                 return res;
-        }
 
-        if (auth_data->user_pwd != NULL) {
-            res = curl_easy_setopt(curl, CURLOPT_USERPWD,
-                auth_data->user_pwd);
+            res = curl_easy_setopt(curl, CURLOPT_PASSWORD,
+                auth_data->password);
             if (!check_res_ok(res))
                 return res;
         }
@@ -220,10 +236,12 @@ int make_request(struct ConnData *cd, char *data,
         return res;
 
     res = curl_easy_perform(curl);
-    // TODO: implemented only in 7.72.0 and later 
-    // https://curl.se/libcurl/c/CURLINFO_EFFECTIVE_METHOD.html
-    // curl_easy_getinfo(curl, CURLINFO_EFFECTIVE_METHOD, &resp_method);
-    // curl_easy_getinfo(curl, CURLINFO_EFFECTIVE_URL, &resp_url);
+    /*
+     * TODO: implemented only in 7.72.0 and later 
+     * https://curl.se/libcurl/c/CURLINFO_EFFECTIVE_METHOD.html
+     * curl_easy_getinfo(curl, CURLINFO_EFFECTIVE_METHOD, &resp_method);
+     * curl_easy_getinfo(curl, CURLINFO_EFFECTIVE_URL, &resp_url);
+    */
     curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &resp_code);
     curl_easy_getinfo(curl, CURLINFO_CONTENT_TYPE, &resp_cont_type);
 

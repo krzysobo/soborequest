@@ -20,31 +20,9 @@
 */
 
 
-#include <curl/curl.h>
-
-
-#ifndef REQ_MTH_H
-#define REQ_MTH_H
-/**
- * @brief  
- * @note   
- * @retval None
- */
-struct PutMethodData
-{
-    char *data;
-    size_t len;
-};
-
-
-int check_res_ok(CURLcode res);
-CURLcode set_method_post(CURL *curl, char *data);
-CURLcode set_method_get(CURL *curl);
-CURLcode set_method_delete(CURL *curl);
-CURLcode set_method_put(CURL *curl, char *data);
-CURLcode set_method_patch(CURL *curl, char *data);
-
-size_t read_function_put_method(char *ptr, size_t size, 
-    size_t nmemb, void *user_data);
-
+#ifndef SOC_FUN_H
+    #define SOC_FUN_H 1
+    int connect_to_server(const char *srv_addr, const uint16_t srv_port);
+    int send_all_data(int sockfd, char *buf, int *len);
+    int read_all_data(int sockfd, void *msg_ret, int len_msg_ret);
 #endif

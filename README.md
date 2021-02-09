@@ -57,8 +57,8 @@ From this directory, please call:
 Then:
     ``` source api_fl/bin/activate```
 
-Bang! You're into the api_fl environment. The last thing to do is to call:
-    ```pip install flask-restful```
+Bang! You're into the api_fl environment. The last thing to do is to call the following from the *python* directory:
+    ```pip install -r requirements.txt```
 
 From now, you can start the python application *api.py* in the activated Python environment.
 Go to the "python" directory in our project and type: 
