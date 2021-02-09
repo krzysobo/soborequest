@@ -24,5 +24,5 @@
     #define SOC_FUN_H 1
     int connect_to_server(const char *srv_addr, const uint16_t srv_port);
     int send_all_data(int sockfd, char *buf, int *len);
-    int read_all_data(int sockfd, void *msg_ret, int len_msg_ret);
+    int read_all_data(int sockfd, char **msg_ret, char *term_seq);
 #endif

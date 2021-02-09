@@ -24,6 +24,7 @@
 #include <netdb.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdbool.h>
 #include <string.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
@@ -32,8 +33,12 @@
 #include "soborequest/socket_functions.h"
 
 
-struct timeval timeout_read = {5, 0};
+struct timeval timeout_read = {0, 700000};
+struct timeval timeout_read2 = {0, 10};
 struct timeval timeout_write = {10, 0};
+
+int add_to_string(char **str, size_t *str_size, char *part);
+
 
 
 /**
@@ -64,7 +69,6 @@ int connect_to_server(const char *srv_addr, const uint16_t srv_port)
     servaddr.sin_addr.s_addr = inet_addr(srv_addr); 
     servaddr.sin_port = htons(srv_port); 
   
-
     if (setsockopt (sockfd, SOL_SOCKET, SO_RCVTIMEO, (char *)&timeout_read, sizeof(timeout_read)) < 0) {
         logger("Can't set socket option for recv.", LOG_ERROR); 
         return -1;
@@ -126,16 +130,82 @@ int send_all_data(int sockfd, char *buf, int *len)
 }
 
 
-/**
- * @brief  
- * @note   
- * @param  *msg_ret: 
- * @retval 
- */
-int read_all_data(int sockfd, void *msg_ret, int len_msg_ret)
+int add_to_string(char **str, size_t *str_size, char *part)
 {
-    int res;
-    res = read(sockfd, (void *)msg_ret, len_msg_ret);
+    char *str_tmp;
+    if (*str == NULL) {
+        return -1;
+    }
 
+    if (strlen(*str) + strlen(part) > *str_size ) {
+        *str_size += strlen(part);
+        str_tmp = realloc(*str, *str_size + 1);
+        if (str_tmp == NULL) {
+            return -1;
+        }
+        *str = str_tmp;
+    }
+    strcat(*str, part);
+
+    return 0;
+}
+
+
+
+
+
+int read_all_data(int sockfd, char **msg_ret, char *term_seq)
+{ 
+    FILE *fp;
+    const int part_size = 20000;
+    int res_add = 0;
+    char *res_get;
+    int res = 0;
+    
+    size_t msg_ret_size = part_size * 10;
+    char *part;
+    bool going = true;
+    int len_term_seq = 0;
+
+    if (term_seq != NULL) 
+        len_term_seq = strlen(term_seq);
+
+    printf("\n\nSTRLEN TERM SEQ %lu", strlen(term_seq));
+
+
+    *msg_ret = calloc(msg_ret_size + 1, 1);
+    part = calloc(part_size + 1, 1);
+
+    fp = fdopen(sockfd, "rb");
+    if (fp == NULL) {
+        free(part);
+        free(*msg_ret);
+        return -1;
+    }
+
+    while (going) {
+        memset(part, 0, part_size);
+        res_get = fgets(part, part_size, fp);
+    
+        if (res_get == NULL) {
+            break;
+        /* } else if (part[strlen(part) - 1] == 0x0A) { */
+        } else if ((len_term_seq > 0) &&  
+            (strcmp(part + strlen(part) - len_term_seq, term_seq) == 0)) {
+            going = false;
+        }
+
+        res_add = add_to_string(msg_ret, &msg_ret_size, part);
+        if (res_add != 0) {
+            res = -1;
+            break;
+        }
+    }
+    fclose(fp);
+
+    free(part);
     return res;
 }
+
+
+

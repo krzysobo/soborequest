@@ -54,5 +54,8 @@ dkms.conf
 .DS_Store
 .vscode
 logs
+*.log
+
+bin/*
 bin/test
 bin/test_*
