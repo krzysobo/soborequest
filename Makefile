@@ -8,6 +8,7 @@ CXX                      := /usr/bin/g++
 CC                       := /usr/bin/gcc
 CXXFLAGS                 :=  -g -O0 -Wall -Werror
 CFLAGS                   :=  -g -O0 -Wall -Werror -std=c89 -pedantic
+CFLAGS_99                :=  -g -O0 -Wall -Werror -std=c99 -pedantic
 ASFLAGS                  := 
 AS                       := /usr/bin/as
 # can be set in the env. vars, ie. export TARGET_PATH='xxxxx'
@@ -19,10 +20,13 @@ SOBO_COMMON_INCLUDE_PATH ?= '/usr/local/share'   # upper directory - always for 
 SOBOLOGGER_LIB_PATH      ?= '/usr/local/lib/sobologger'
 SOBOUTILS_LIB_PATH       ?= '/usr/local/lib/soboutils'
 
+OPENSSL_INCLUDE_PATH     ?= "/usr/local/Cellar/node/13.1.0/include/node"
+
+
 .PHONY: clean
 
-all: requestlib_static
-alltest: requestlib_static testrequest testsocket
+all: requestlib_static 
+alltest: requestlib_static testrequest testsocket test_ssl
 
 
 request: src/request.c
@@ -60,7 +64,19 @@ socket_functions: src/socket_functions.c
 	chmod 777 $(TARGET_PATH)/socket_functions.o
 
 
-requestlib_static: request request_methods request_cb_functions socket_functions
+ssl_functions: src/ssl_functions.c
+	$(CC) $(CFLAGS_99) \
+	-fpic -o $(TARGET_PATH)/ssl_functions.o \
+	-c src/ssl_functions.c \
+	-I include \
+	-I $(SOBO_COMMON_INCLUDE_PATH) \
+	`pkg-config --cflags openssl`
+
+	chmod 777 $(TARGET_PATH)/ssl_functions.o
+
+
+requestlib_static: request request_methods request_cb_functions \
+socket_functions ssl_functions
 	ar rcs $(TARGET_PATH)/libsoborequest.a \
 	$(TARGET_PATH)/*.o
 
@@ -85,6 +101,17 @@ testsocket: src/test/test_socket.c
 	-I $(SOBOREQUEST_INCLUDE_PATH) \
 	-I $(SOBO_COMMON_INCLUDE_PATH) \
 	-lcurl
+	
+test_ssl: src/test/test_ssl.c
+	$(CC) $(CFLAGS_99) -fpic -o bin/test_ssl \
+	src/test/test_ssl.c \
+	$(TARGET_PATH)/libsoborequest.a \
+	$(SOBOLOGGER_LIB_PATH)/libsobologger.a \
+	-I include \
+	-I $(SOBOREQUEST_INCLUDE_PATH) \
+	-I $(SOBO_COMMON_INCLUDE_PATH) \
+	`pkg-config --cflags openssl` \
+	`pkg-config --libs openssl`
 
 
 install:
