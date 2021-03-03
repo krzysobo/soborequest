@@ -20,6 +20,8 @@
 */
 
 
+#define _XOPEN_SOURCE 600  /* for fdopen in stdio.h */
+
 #include <unistd.h>  /* write, sleep itd */
 #include <netdb.h>
 #include <stdio.h>
