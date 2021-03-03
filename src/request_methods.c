@@ -38,7 +38,7 @@ size_t read_function_put_method(char *ptr, size_t size,
     
     userdata = (struct PutMethodData*)user_data;
     
-    printf("\nuserdata->len, %lu", userdata->len);
+    printf("\nuserdata->len, %lu", (unsigned long)userdata->len);
 
     /*
      size_t to_copy = (userdata->len < curl_size)? userdata->len: curl_size;
