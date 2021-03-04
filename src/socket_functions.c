@@ -149,9 +149,6 @@ int read_all_data(int sockfd, char **msg_ret, char *term_seq)
     if (term_seq != NULL) 
         len_term_seq = strlen(term_seq);
 
-    printf("\n\nSTRLEN TERM SEQ %lu", strlen(term_seq));
-
-
     *msg_ret = calloc(msg_ret_size + 1, 1);
     part = calloc(part_size + 1, 1);
 
