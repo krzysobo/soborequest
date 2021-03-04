@@ -86,7 +86,10 @@ void test_mass(char *url, long port, enum METHOD m, int num,
 
         printf("\n\n TEST=> RESP CODE %lu size: %lu CONTENTS: %s "
             "CONTENT-TYPE: %s\n",
-            resp->status_code, resp->size, resp->contents, resp->content_type
+            (unsigned long)resp->status_code, 
+            (unsigned long)resp->size, 
+            resp->contents,
+            resp->content_type
         );
 
         if(test_contents != NULL) {
