@@ -14,7 +14,7 @@ AS                       := /usr/bin/as
 # can be set in the env. vars, ie. export TARGET_PATH='xxxxx'
 TARGET_PATH              ?= 'bin'
 
-SOBOREQUEST_INCLUDE_PATH ?= '/usr/local/share/soborequest'
+SOBOREQUEST_INSTALL_INCLUDE_PATH ?= '/usr/local/share/soborequest'
 SOBOREQUEST_LIB_PATH     ?= '/usr/local/lib/soborequest'
 SOBO_COMMON_INCLUDE_PATH ?= '/usr/local/share'   # upper directory - always for using in other projects
 SOBOLOGGER_LIB_PATH      ?= '/usr/local/lib/sobologger'
@@ -32,8 +32,7 @@ alltest: requestlib_static testrequest testsocket test_ssl
 request: src/request.c
 	$(CC) $(CFLAGS) -fpic -o $(TARGET_PATH)/request.o \
 	-c src/request.c \
-	-I include \
-	-I $(SOBOREQUEST_INCLUDE_PATH)
+	-I include
 
 	chmod 777 $(TARGET_PATH)/request.o
 
@@ -41,8 +40,7 @@ request: src/request.c
 request_methods: src/request_methods.c
 	$(CC) $(CFLAGS) -fpic -o $(TARGET_PATH)/request_methods.o \
 	-c src/request_methods.c \
-	-I include \
-	-I $(SOBOREQUEST_INCLUDE_PATH)
+	-I include
 
 	chmod 777 $(TARGET_PATH)/request_methods.o
 
@@ -88,7 +86,6 @@ testrequest: src/test/test_request.c
 	src/test/test_request.c \
 	$(TARGET_PATH)/libsoborequest.a \
 	-I include \
-	-I $(SOBOREQUEST_INCLUDE_PATH) \
 	-lcurl
 
 
@@ -98,7 +95,6 @@ testsocket: src/test/test_socket.c
 	$(TARGET_PATH)/libsoborequest.a \
 	$(SOBOLOGGER_LIB_PATH)/libsobologger.a \
 	-I include \
-	-I $(SOBOREQUEST_INCLUDE_PATH) \
 	-I $(SOBO_COMMON_INCLUDE_PATH) \
 	-lcurl
 	
@@ -108,7 +104,6 @@ test_ssl: src/test/test_ssl.c
 	$(TARGET_PATH)/libsoborequest.a \
 	$(SOBOLOGGER_LIB_PATH)/libsobologger.a \
 	-I include \
-	-I $(SOBOREQUEST_INCLUDE_PATH) \
 	-I $(SOBO_COMMON_INCLUDE_PATH) \
 	`pkg-config --cflags openssl` \
 	`pkg-config --libs openssl`
@@ -117,9 +112,9 @@ test_ssl: src/test/test_ssl.c
 install:
 	@echo "\nThis operation requires the SUDO access.\n"
 	sudo mkdir -p $(SOBOREQUEST_LIB_PATH)
-	sudo mkdir -p $(SOBOREQUEST_INCLUDE_PATH)
+	sudo mkdir -p $(SOBOREQUEST_INSTALL_INCLUDE_PATH)
 	sudo cp -rf $(TARGET_PATH)/libsoborequest.a $(SOBOREQUEST_LIB_PATH)/
-	sudo cp -rf include/soborequest/* $(SOBOREQUEST_INCLUDE_PATH)/
+	sudo cp -rf include/soborequest/* $(SOBOREQUEST_INSTALL_INCLUDE_PATH)/
 
 clean:
 	rm -rf *.o
