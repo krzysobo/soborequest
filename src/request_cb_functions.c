@@ -1,4 +1,4 @@
-/*  
+/*
 *  Copyright (c) 2020-2021 Krzysztof Sobolewski <krzysztof.sobolewski@gmail.com>
 *  Permission is hereby granted, free of charge, to any person obtaining a copy
 *  of this software and associated documentation files (the "Software"), to deal
@@ -27,9 +27,9 @@
 
 
 /**
- * @brief  
- * @note   
- * @param  *mem: 
+ * @brief
+ * @note
+ * @param  *mem:
  * @retval None
  */
 void init_memory_chunk(struct Memory *mem)
@@ -46,50 +46,52 @@ struct ResponseData *make_response_data(
     resp = calloc(1, sizeof(struct ResponseData));
     resp->status_code = status_code;
     resp->size = size;
-    if((contents != NULL) && (strlen(contents) > 0)) {
+    if ((contents != NULL) && (strlen(contents) > 0)) {
         resp->contents = calloc(strlen(contents) + 1, 1);
-        memcpy(resp->contents, contents, strlen(contents)); 
-    } else {
+        memcpy(resp->contents, contents, strlen(contents));
+    }
+    else {
         resp->contents = calloc(2, 1);
-        resp->contents[1] = 0;        
+        resp->contents[1] = 0;
     }
 
-    if((content_type != NULL) && (strlen(content_type) > 0)) {
+    if ((content_type != NULL) && (strlen(content_type) > 0)) {
         resp->content_type = calloc(strlen(content_type) + 1, 1);
-        memcpy(resp->content_type, content_type, strlen(content_type)); 
-    } else {
-        resp->content_type = calloc(2, 1);
-        resp->content_type[1] = 0;        
+        memcpy(resp->content_type, content_type, strlen(content_type));
     }
-  
+    else {
+        resp->content_type = calloc(2, 1);
+        resp->content_type[1] = 0;
+    }
+
     return resp;
 }
 
 
 
 /**
- * @brief  
- * @note   
- * @param  *data: - data fetched from server 
+ * @brief
+ * @note
+ * @param  *data: - data fetched from server
  * @param  size: size of a single item (eg. char)
  * @param  nitems: number of items (eg. 10 chars in a ten-char string)
- * @param  *userdata: 
- * @retval 
+ * @param  *userdata:
+ * @retval
  */
-size_t write_function_common(void *data, size_t size, 
+size_t write_function_common(void *data, size_t size,
     size_t nitems, void *userdata)
-{   
+{
     size_t realsize = size * nitems;  /* size of all items together */
 
-    /* casting back to struct Memory (initial casting was at setting 
+    /* casting back to struct Memory (initial casting was at setting
      * the variable write_chunk)
      */
     struct Memory *mem_userdata = (struct Memory *)userdata;
 
-    char *ptr = realloc(mem_userdata->response, 
+    char *ptr = realloc(mem_userdata->response,
         mem_userdata->size + realsize + 1);
-    
-    if (ptr == NULL) 
+
+    if (ptr == NULL)
         return 0;  /* not enough memory */
 
     mem_userdata->response = ptr;

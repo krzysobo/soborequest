@@ -1,4 +1,4 @@
-/*  
+/*
 *  Copyright (c) 2020-2021 Krzysztof Sobolewski <krzysztof.sobolewski@gmail.com>
 *  Permission is hereby granted, free of charge, to any person obtaining a copy
 *  of this software and associated documentation files (the "Software"), to deal
@@ -39,16 +39,16 @@
 
 /**
  * @brief  mass-testing
- * @note   
- * @param  *url: 
- * @param  port: 
- * @param  m: 
- * @param  num: 
- * @param  *test_contents: 
- * @param  *test_ct: 
+ * @note
+ * @param  *url:
+ * @param  port:
+ * @param  m:
+ * @param  num:
+ * @param  *test_contents:
+ * @param  *test_ct:
  * @retval None
  */
-void test_mass(char *url, long port, enum METHOD m, int num, 
+void test_mass(char *url, long port, enum METHOD m, int num,
     char *test_contents, char *test_ct)
 {
     CURLcode res;
@@ -57,9 +57,9 @@ void test_mass(char *url, long port, enum METHOD m, int num,
 
     struct ResponseData *resp;
     int num_errors = 0;
-    
-    /* 
-    * C89 compatibility - looks weird (can't use function 
+
+    /*
+    * C89 compatibility - looks weird (can't use function
     * vars at struct initialization)
     */
     struct ConnData cd;
@@ -67,49 +67,52 @@ void test_mass(char *url, long port, enum METHOD m, int num,
     cd.port = port;
     cd.method = m;
 
-    for(i=0; i < num; i++) {  
-        printf("\nMaking request %d/%d to: %s port: %lu method: %d (%s)...", 
+    for (i = 0; i < num; i++) {
+        printf("\nMaking request %d/%d to: %s port: %lu method: %d (%s)...",
             i + 1, num, cd.url, cd.port, cd.method, methodName(cd.method));
         res = make_request(&cd, data, NULL, NULL, NULL, &resp);
-        
+
         /*
         * I don't want to use assert here, because I don't want the program to quit on the
         * first failed conneciton. I'd rather like to gather the info about how often it happens.
         */
         if (res == CURLE_OK) {
             printf(" - OK!\n");
-        } else {
+        }
+        else {
             printf(" - FAILED! Error Code: %d. \n", res);
             num_errors++;
             continue;
-        }       
+        }
 
         printf("\n\n TEST=> RESP CODE %lu size: %lu CONTENTS: %s "
             "CONTENT-TYPE: %s\n",
-            (unsigned long)resp->status_code, 
-            (unsigned long)resp->size, 
+            (unsigned long)resp->status_code,
+            (unsigned long)resp->size,
             resp->contents,
             resp->content_type
         );
 
-        if(test_contents != NULL) {
-            printf("\nTESTING: RESP cnt: '%s'\nTEST cnt: '%s'. Is equal?", 
+        if (test_contents != NULL) {
+            printf("\nTESTING: RESP cnt: '%s'\nTEST cnt: '%s'. Is equal?",
                 resp->contents, test_contents);
 
-            if(strcmp(resp->contents, test_contents) == 0) {
-                printf(" -- YES, OK! \n");    
-            } else {
+            if (strcmp(resp->contents, test_contents) == 0) {
+                printf(" -- YES, OK! \n");
+            }
+            else {
                 printf(" -- FAILED! \n");
                 num_errors++;
                 continue;
             }
         }
-        if(test_ct != NULL) {
-            printf("\nTESTING: RESP ct: '%s'\nTEST ct: '%s'. Is equal?", 
+        if (test_ct != NULL) {
+            printf("\nTESTING: RESP ct: '%s'\nTEST ct: '%s'. Is equal?",
                 resp->content_type, test_ct);
-            if(strcmp(resp->content_type, test_ct) == 0) {
-                printf(" -- YES, OK! \n");    
-            } else {
+            if (strcmp(resp->content_type, test_ct) == 0) {
+                printf(" -- YES, OK! \n");
+            }
+            else {
                 printf(" -- FAILED! \n");
                 num_errors++;
                 continue;
@@ -119,7 +122,8 @@ void test_mass(char *url, long port, enum METHOD m, int num,
 
     if (num_errors > 0) {
         printf("\nThere were %d error(s) out of %d tests.\n", num_errors, num);
-    } else {
+    }
+    else {
         printf("\nAll %d tests have been performed successfully.\n", num);
     }
     printf("================================================\n\n");
@@ -129,16 +133,16 @@ void test_mass(char *url, long port, enum METHOD m, int num,
 int main(int argc, char **argv)
 {
     int status = 0;
-    char *url = (argc > 0 && argv[1])?argv[1]: "http://127.0.0.1";
+    char *url = (argc > 0 && argv[1]) ? argv[1] : "http://127.0.0.1";
     long port = 5000;
-    int num = 10;    
+    int num = 10;
     printf("\ntest_request testing has been started... \n\n");
-    
+
     test_mass(url, port, METHOD_GET, num, "\"GET IS OK\"\n", NULL);
     test_mass(url, port, METHOD_POST, num, "\"POST IS OK\"\n", NULL);
     test_mass(url, port, METHOD_DELETE, num, "\"DELETE IS OK\"\n", NULL);
     test_mass(url, port, METHOD_PATCH, num, "\"PATCH IS OK\"\n", NULL);
-    
+
     printf("\ntest_request testing has been finished... \n\n");
 
     return status;

@@ -1,4 +1,4 @@
-/*  
+/*
 *  Copyright (c) 2020-2021 Krzysztof Sobolewski <krzysztof.sobolewski@gmail.com>
 *  Permission is hereby granted, free of charge, to any person obtaining a copy
 *  of this software and associated documentation files (the "Software"), to deal
@@ -29,16 +29,16 @@
 
 
 /**
- * @brief  METHODS handled by make_request (not all of them implemented yet! 
+ * @brief  METHODS handled by make_request (not all of them implemented yet!
  *         See request.c:make_request for details)
- * @note   
+ * @note
  * @retval None
  */
 enum METHOD {
     METHOD_GET = 1,
     METHOD_POST,
     METHOD_PUT,
-    METHOD_PATCH, 
+    METHOD_PATCH,
     METHOD_DELETE,
 
     METHOD_HEAD,
@@ -50,16 +50,16 @@ enum METHOD {
 
 /**
  * @brief  returns the name of a HTTP method
- * @note   
- * @param  m: 
- * @retval 
+ * @note
+ * @param  m:
+ * @retval
  */
-const char * methodName(enum METHOD m);
+const char *methodName(enum METHOD m);
 
 
 /**
  * @brief  the last METHOD handled, used for checking/validation
- * @note   
+ * @note
  * @retval None
  */
 
@@ -74,35 +74,35 @@ struct ConnData {
 struct HeaderData {
     /**
      * @brief  optional headers - array of strings
-     * @note   
+     * @note
      * @retval None
      */
     char **headers;
 
     /**
      * @brief  number of headers - obligatory if **headers are set
-     * @note   
+     * @note
      * @retval None
      */
-    int num_headers; 
+    int num_headers;
 
     /**
      * @brief  true (1L) or false (def. 0)
-     * @note   
+     * @note
      * @retval None
      */
     long follow_redirects;
 
     /**
      * @brief  true (1L) or false (def. 0)
-     * @note   
+     * @note
      * @retval None
      */
     long use_autoreferer;
 
     /**
      * @brief  referer URL
-     * @note   
+     * @note
      * @retval None
      */
     char *referer;
@@ -112,7 +112,7 @@ struct HeaderData {
 struct AuthData {
     /**
      * @brief  CURLAUTH_* from curl/curl.h
-     * @note   
+     * @note
      * @retval None
      */
     unsigned long auth_type;   /* default - CURLAUTH_NONE */

@@ -1,4 +1,4 @@
-/*  
+/*
 *  Copyright (c) 2020-2021 Krzysztof Sobolewski <krzysztof.sobolewski@gmail.com>
 *  Permission is hereby granted, free of charge, to any person obtaining a copy
 *  of this software and associated documentation files (the "Software"), to deal
@@ -33,72 +33,63 @@
 #include <sys/time.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
-#include "sobologger/logger.h"
 #include "soborequest/socket_functions.h"
 #include "soboutils/utils_string.h"
 
 
-struct timeval timeout_read = {0, 700000};
-struct timeval timeout_read2 = {0, 10};
-struct timeval timeout_write = {10, 0};
+struct timeval timeout_read = { 0, 700000 };
+struct timeval timeout_read2 = { 0, 10 };
+struct timeval timeout_write = { 10, 0 };
 
 
 
 
 /**
- * @brief  
- * @note   
- * @param  *srv_addr: 
- * @param  srv_port: 
- * @retval 
+ * @brief
+ * @note
+ * @param  *srv_addr:
+ * @param  srv_port:
+ * @retval
  */
 int connect_to_server(const char *srv_addr, const uint16_t srv_port)
 {
-    int sockfd; 
-    struct sockaddr_in servaddr; 
+    int sockfd;
+    struct sockaddr_in servaddr;
 
     /* socket create and varification */
-    sockfd = socket(AF_INET, SOCK_STREAM, 0); 
-    if (sockfd == -1) { 
-        logger("socket creation failed.", LOG_ERROR); 
-        return -1;
-    } 
-    else
-        logger("Socket successfully created.", LOG_DEBUG);
-    
-    memset(&servaddr, 0, sizeof(servaddr));
-    
-    /* assign IP, PORT */
-    servaddr.sin_family = AF_INET; 
-    servaddr.sin_addr.s_addr = inet_addr(srv_addr); 
-    servaddr.sin_port = htons(srv_port); 
-  
-    if (setsockopt (sockfd, SOL_SOCKET, SO_RCVTIMEO, (char *)&timeout_read, sizeof(timeout_read)) < 0) {
-        logger("Can't set socket option for recv.", LOG_ERROR); 
+    sockfd = socket(AF_INET, SOCK_STREAM, 0);
+    if (sockfd == -1) {   /* socket creation failed. */
         return -1;
     }
-    if (setsockopt (sockfd, SOL_SOCKET, SO_SNDTIMEO, (char *)&timeout_write, sizeof(timeout_write)) < 0) {
-        logger("Can't set socket option for send.", LOG_ERROR); 
+
+    memset(&servaddr, 0, sizeof(servaddr));
+
+    /* assign IP, PORT */
+    servaddr.sin_family = AF_INET;
+    servaddr.sin_addr.s_addr = inet_addr(srv_addr);
+    servaddr.sin_port = htons(srv_port);
+
+    if (setsockopt(sockfd, SOL_SOCKET, SO_RCVTIMEO, (char *)&timeout_read, sizeof(timeout_read)) < 0) {
+        return -1;
+    }
+    if (setsockopt(sockfd, SOL_SOCKET, SO_SNDTIMEO, (char *)&timeout_write, sizeof(timeout_write)) < 0) {
         return -1;
     }
 
     /* connect the client socket to server socket */
-    if (connect(sockfd, (struct sockaddr *)&servaddr, sizeof(servaddr)) != 0) { 
-        logger("connection with the server failed.", LOG_ERROR); 
+    if (connect(sockfd, (struct sockaddr *)&servaddr, sizeof(servaddr)) != 0) {
         return -1;
-    } 
-    else
-        logger("connected to the server.", LOG_INFO); 
+    }
 
     return sockfd;
 }
 
 
 /**
- * @brief  
- * @note   
- * @param  sockfd: 
- * @retval 
+ * @brief
+ * @note
+ * @param  sockfd:
+ * @retval
  */
 int close_connection(int sockfd)
 {
@@ -109,12 +100,12 @@ int close_connection(int sockfd)
 
 
 /**
- * @brief  
- * @note   
- * @param  sockfd: 
- * @param  *buf: 
- * @param  *len: 
- * @retval 
+ * @brief
+ * @note
+ * @param  sockfd:
+ * @param  *buf:
+ * @param  *len:
+ * @retval
  */
 int send_all_data(int sockfd, char *buf, int *len)
 {
@@ -122,32 +113,34 @@ int send_all_data(int sockfd, char *buf, int *len)
     int bytesleft = *len; /* how many we have left to send */
     int n;
 
-    while(total < *len) {
+    while (total < *len) {
         n = send(sockfd, buf + total, bytesleft, 0);
-        if (n == -1) { break; }
+        if (n == -1) {
+            break;
+        }
         total += n;
         bytesleft -= n;
     }
     *len = total; /* return number actually sent here */
 
-    return (n == -1)? -1: 0; /* return -1 on failure, 0 on success */
+    return (n == -1) ? -1 : 0; /* return -1 on failure, 0 on success */
 }
 
 
 int read_all_data(int sockfd, char **msg_ret, char *term_seq)
-{ 
+{
     FILE *fp;
     const int part_size = 20000;
     int res_add = 0;
     char *res_get;
     int res = 0;
-    
+
     size_t msg_ret_size = part_size * 10;
     char *part;
     bool going = true;
     int len_term_seq = 0;
 
-    if (term_seq != NULL) 
+    if (term_seq != NULL)
         len_term_seq = strlen(term_seq);
 
     *msg_ret = calloc(msg_ret_size + 1, 1);
@@ -163,11 +156,12 @@ int read_all_data(int sockfd, char **msg_ret, char *term_seq)
     while (going) {
         memset(part, 0, part_size);
         res_get = fgets(part, part_size, fp);
-    
+
         if (res_get == NULL) {
             break;
-        /* } else if (part[strlen(part) - 1] == 0x0A) { */
-        } else if ((len_term_seq > 0) &&  
+            /* } else if (part[strlen(part) - 1] == 0x0A) { */
+        }
+        else if ((len_term_seq > 0) &&
             (strcmp(part + strlen(part) - len_term_seq, term_seq) == 0)) {
             going = false;
         }

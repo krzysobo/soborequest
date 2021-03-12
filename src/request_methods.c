@@ -1,4 +1,4 @@
-/*  
+/*
 *  Copyright (c) 2020-2021 Krzysztof Sobolewski <krzysztof.sobolewski@gmail.com>
 *  Permission is hereby granted, free of charge, to any person obtaining a copy
 *  of this software and associated documentation files (the "Software"), to deal
@@ -29,15 +29,15 @@
 
 
 /* TODO - the method under construction */
-size_t read_function_put_method(char *ptr, size_t size, 
+size_t read_function_put_method(char *ptr, size_t size,
     size_t nmemb, void *user_data)
-{  
+{
     struct PutMethodData *userdata;
-    
+
     userdata = calloc(1, sizeof userdata);
-    
-    userdata = (struct PutMethodData*)user_data;
-    
+
+    userdata = (struct PutMethodData *)user_data;
+
     printf("\nuserdata->len, %lu", (unsigned long)userdata->len);
 
     /*
@@ -53,14 +53,14 @@ size_t read_function_put_method(char *ptr, size_t size,
 
 /**
  * @brief checks if a result code is OK (only CURLE_OK / 0 is OK)
- * @note   
- * @param  res: 
+ * @note
+ * @param  res:
  * @retval 1 (true) or 0 (false)
  */
 int check_res_ok(CURLcode res)
 {
-    /* CURLE_OK = 0 IS OK, anything else is an error. We're re-using 
-     * the CURL codes for error tracing/logging 
+    /* CURLE_OK = 0 IS OK, anything else is an error. We're re-using
+     * the CURL codes for error tracing/logging
      */
     return (res == CURLE_OK);
 }
@@ -68,12 +68,12 @@ int check_res_ok(CURLcode res)
 
 /**
  * @brief  sets the POST method
- * @note   
- * @param  *curl: 
- * @param  *data: 
- * @retval 
+ * @note
+ * @param  *curl:
+ * @param  *data:
+ * @retval
  */
-CURLcode set_method_post(CURL *curl, char *data) 
+CURLcode set_method_post(CURL *curl, char *data)
 {
     CURLcode res;
     long len_data;
@@ -81,12 +81,14 @@ CURLcode set_method_post(CURL *curl, char *data)
     if (data != NULL) {
         len_data = strlen(data);
         if (len_data > 2000000000) {
-            res = curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE_LARGE, 
+            res = curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE_LARGE,
                 (curl_off_t)len_data);
-        } else {
+        }
+        else {
             res = curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, len_data);
         }
-    } else {
+    }
+    else {
         res = curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, 0);
     }
     if (!check_res_ok(res))
@@ -99,12 +101,12 @@ CURLcode set_method_post(CURL *curl, char *data)
 
 /**
  * @brief  sets the POST method
- * @note   
- * @param  *curl: 
- * @param  *data: 
- * @retval 
+ * @note
+ * @param  *curl:
+ * @param  *data:
+ * @retval
  */
-CURLcode set_method_patch(CURL *curl, char *data) 
+CURLcode set_method_patch(CURL *curl, char *data)
 {
     CURLcode res;
     long len_data;
@@ -112,12 +114,14 @@ CURLcode set_method_patch(CURL *curl, char *data)
     if (data != NULL) {
         len_data = strlen(data);
         if (len_data > 2000000000) {
-            res = curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE_LARGE, 
+            res = curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE_LARGE,
                 (curl_off_t)len_data);
-        } else {
+        }
+        else {
             res = curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, len_data);
         }
-    } else {
+    }
+    else {
         res = curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, 0);
     }
     if (!check_res_ok(res))
@@ -134,9 +138,9 @@ CURLcode set_method_patch(CURL *curl, char *data)
 
 /**
  * @brief  sets the GET method
- * @note   
- * @param  *curl: 
- * @retval 
+ * @note
+ * @param  *curl:
+ * @retval
  */
 CURLcode set_method_get(CURL *curl)
 {
@@ -146,9 +150,9 @@ CURLcode set_method_get(CURL *curl)
 
 /**
  * @brief  sets the DELETE method
- * @note   
- * @param  *curl: 
- * @retval 
+ * @note
+ * @param  *curl:
+ * @retval
  */
 CURLcode set_method_delete(CURL *curl)
 {
@@ -158,10 +162,10 @@ CURLcode set_method_delete(CURL *curl)
 
 /**
  * @brief  sets the PUT method (warning; PUT = CURLOPT_UPLOAD)
- * @note   
- * @param  *curl: 
- * @param  *data: 
- * @retval 
+ * @note
+ * @param  *curl:
+ * @param  *data:
+ * @retval
  */
 CURLcode set_method_put(CURL *curl, char *data)
 {
@@ -171,9 +175,7 @@ CURLcode set_method_put(CURL *curl, char *data)
     struct PutMethodData put_method_data;
     put_method_data.data = data;
 
-
-
-    res = curl_easy_setopt(curl, CURLOPT_READFUNCTION, 
+    res = curl_easy_setopt(curl, CURLOPT_READFUNCTION,
         read_function_put_method);
     if (!check_res_ok(res))
         return res;
@@ -189,7 +191,8 @@ CURLcode set_method_put(CURL *curl, char *data)
     len_data = strlen(data);
     if (len_data > 2000000000) {
         res = curl_easy_setopt(curl, CURLOPT_INFILESIZE_LARGE, len_data);
-    } else {
+    }
+    else {
         res = curl_easy_setopt(curl, CURLOPT_INFILESIZE, len_data);
     }
     return res;

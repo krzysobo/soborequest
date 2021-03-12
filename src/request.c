@@ -1,4 +1,4 @@
-/*  
+/*
 *  Copyright (c) 2020-2021 Krzysztof Sobolewski <krzysztof.sobolewski@gmail.com>
 *  Permission is hereby granted, free of charge, to any person obtaining a copy
 *  of this software and associated documentation files (the "Software"), to deal
@@ -30,25 +30,25 @@
 
 
 /**
- * @brief  
- * @note   
- * @param  *curl: 
- * @param  **headers: 
- * @param  num_headers: 
- * @param  *headers_list: 
- * @param  *headers_temp: 
- * @retval 
+ * @brief
+ * @note
+ * @param  *curl:
+ * @param  **headers:
+ * @param  num_headers:
+ * @param  *headers_list:
+ * @param  *headers_temp:
+ * @retval
  */
 
 
-const char * methodName(enum METHOD m)
+const char *methodName(enum METHOD m)
 {
     static const char *names[] = {
-        "GET", "POST", "PUT", "PATCH", "DELETE", "HEAD", 
-        "CONNECT", "OPTIONS", "TRACE"};
+        "GET", "POST", "PUT", "PATCH", "DELETE", "HEAD",
+        "CONNECT", "OPTIONS", "TRACE" };
     static int size_names = 9;
     int m_ob0 = m - 1;
-    if(m_ob0 < size_names) {
+    if (m_ob0 < size_names) {
         return names[m_ob0];
     }
 
@@ -56,15 +56,15 @@ const char * methodName(enum METHOD m)
 }
 
 
-int set_headers(CURL *curl, char **headers, 
+int set_headers(CURL *curl, char **headers,
     int num_headers,
-    struct curl_slist *headers_list, 
+    struct curl_slist *headers_list,
     struct curl_slist *headers_temp)
 {
     int res = CURLE_OK;
     int i;
 
-    if((headers == NULL) || (num_headers < 1)) {
+    if ((headers == NULL) || (num_headers < 1)) {
         return res;
     }
 
@@ -83,15 +83,15 @@ int set_headers(CURL *curl, char **headers,
 
 /**
  * @brief  makes a request
- * @note   
- * @param  *cd: 
- * @param  *data: 
- * @param  *header_data: 
- * @param  *auth_data: 
- * @param  *cb_data: 
+ * @note
+ * @param  *cd:
+ * @param  *data:
+ * @param  *header_data:
+ * @param  *auth_data:
+ * @param  *cb_data:
  * @param  **resp: ResponseData if retval==CURLE_OK, NULL otherwise
- *         (do not try to display the  members of NULL, because it will cause segmentation fault!) 
- * @retval 
+ *         (do not try to display the  members of NULL, because it will cause segmentation fault!)
+ * @retval
  */
 int make_request(struct ConnData *cd, char *data,
     struct HeaderData *header_data, struct AuthData *auth_data,
@@ -111,7 +111,7 @@ int make_request(struct ConnData *cd, char *data,
 
     init_memory_chunk(&chunk_write);
     init_memory_chunk(&chunk_read);
-    
+
 
     if (curl == NULL) {  /* something went wrong, don't go further */
         return CURLE_FAILED_INIT;  /* re-using the codes from CURL */
@@ -130,7 +130,7 @@ int make_request(struct ConnData *cd, char *data,
             return res;
     }
 
-    if (header_data != NULL ) {
+    if (header_data != NULL) {
         if (header_data->follow_redirects) {
             res = curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION,
                 header_data->follow_redirects);
@@ -142,8 +142,9 @@ int make_request(struct ConnData *cd, char *data,
                 header_data->use_autoreferer);
             if (!check_res_ok(res))
                 return res;
-        } else if ((header_data->referer != NULL) && 
-                (strlen(header_data->referer))) {
+        }
+        else if ((header_data->referer != NULL) &&
+            (strlen(header_data->referer))) {
             res = curl_easy_setopt(curl, CURLOPT_REFERER,
                 header_data->referer);
             if (!check_res_ok(res))
@@ -180,7 +181,8 @@ int make_request(struct ConnData *cd, char *data,
         res = curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void *)&chunk_write);
         if (!check_res_ok(res))
             return res;
-    } else {
+    }
+    else {
         res = curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_function_common);
         if (!check_res_ok(res))
             return res;
@@ -202,42 +204,42 @@ int make_request(struct ConnData *cd, char *data,
         return res;
 
     switch (cd->method) {
-        case METHOD_GET:
-            res = set_method_get(curl);
-            break;
-        case METHOD_POST:
-            res = set_method_post(curl, data);
-            break;
-        case METHOD_PUT:
-            res = set_method_put(curl, data);
-            break;
-        case METHOD_PATCH:
-            res = set_method_patch(curl, data);
-            break;
-        case METHOD_DELETE:
-            res = set_method_delete(curl);
-            break;
-        case METHOD_HEAD:
-            res = RES_NOT_IMPLEMENTED_YET;
-            break;
-        case METHOD_CONNECT:
-            res = RES_NOT_IMPLEMENTED_YET;
-            break;
-        case METHOD_OPTIONS:
-            res = RES_NOT_IMPLEMENTED_YET;
-            break;
-        case METHOD_TRACE:
-            res = RES_NOT_IMPLEMENTED_YET;
-            break;
-        default:
-            res = CURLE_BAD_FUNCTION_ARGUMENT;
+    case METHOD_GET:
+        res = set_method_get(curl);
+        break;
+    case METHOD_POST:
+        res = set_method_post(curl, data);
+        break;
+    case METHOD_PUT:
+        res = set_method_put(curl, data);
+        break;
+    case METHOD_PATCH:
+        res = set_method_patch(curl, data);
+        break;
+    case METHOD_DELETE:
+        res = set_method_delete(curl);
+        break;
+    case METHOD_HEAD:
+        res = RES_NOT_IMPLEMENTED_YET;
+        break;
+    case METHOD_CONNECT:
+        res = RES_NOT_IMPLEMENTED_YET;
+        break;
+    case METHOD_OPTIONS:
+        res = RES_NOT_IMPLEMENTED_YET;
+        break;
+    case METHOD_TRACE:
+        res = RES_NOT_IMPLEMENTED_YET;
+        break;
+    default:
+        res = CURLE_BAD_FUNCTION_ARGUMENT;
     }
     if (!check_res_ok(res))
         return res;
 
     res = curl_easy_perform(curl);
     /*
-     * TODO: implemented only in 7.72.0 and later 
+     * TODO: implemented only in 7.72.0 and later
      * https://curl.se/libcurl/c/CURLINFO_EFFECTIVE_METHOD.html
      * curl_easy_getinfo(curl, CURLINFO_EFFECTIVE_METHOD, &resp_method);
      * curl_easy_getinfo(curl, CURLINFO_EFFECTIVE_URL, &resp_url);
@@ -245,13 +247,13 @@ int make_request(struct ConnData *cd, char *data,
     curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &resp_code);
     curl_easy_getinfo(curl, CURLINFO_CONTENT_TYPE, &resp_cont_type);
 
-    *resp = make_response_data(resp_code, chunk_write.size, 
+    *resp = make_response_data(resp_code, chunk_write.size,
         chunk_write.response, resp_cont_type);
 
-    if(headers_temp != NULL)
+    if (headers_temp != NULL)
         curl_slist_free_all(headers_temp);
-    
-    if(headers_list != NULL)
+
+    if (headers_list != NULL)
         curl_slist_free_all(headers_list);
 
     if (!check_res_ok(res))

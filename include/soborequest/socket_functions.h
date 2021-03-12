@@ -1,4 +1,4 @@
-/*  
+/*
 *  Copyright (c) 2020-2021 Krzysztof Sobolewski <krzysztof.sobolewski@gmail.com>
 *  Permission is hereby granted, free of charge, to any person obtaining a copy
 *  of this software and associated documentation files (the "Software"), to deal
@@ -21,9 +21,12 @@
 
 
 #ifndef SOC_FUN_H
-    #define SOC_FUN_H 1
-    #include <stdint.h>
-    int connect_to_server(const char *srv_addr, const uint16_t srv_port);
-    int send_all_data(int sockfd, char *buf, int *len);
-    int read_all_data(int sockfd, char **msg_ret, char *term_seq);
+#define SOC_FUN_H 1
+
+#include <stdint.h>
+
+int connect_to_server(const char *srv_addr, const uint16_t srv_port);
+int send_all_data(int sockfd, char *buf, int *len);
+int read_all_data(int sockfd, char **msg_ret, char *term_seq);
+
 #endif

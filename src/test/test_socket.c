@@ -1,4 +1,4 @@
-/*  
+/*
 *  Copyright (c) 2020-2021 Krzysztof Sobolewski <krzysztof.sobolewski@gmail.com>
 *  Permission is hereby granted, free of charge, to any person obtaining a copy
 *  of this software and associated documentation files (the "Software"), to deal
@@ -41,29 +41,30 @@
 
 /**
  * @brief  mass-testing
- * @note   
- * @param  *url: 
- * @param  port: 
- * @param  m: 
- * @param  num: 
- * @param  *test_contents: 
- * @param  *test_ct: 
+ * @note
+ * @param  *url:
+ * @param  port:
+ * @param  m:
+ * @param  num:
+ * @param  *test_contents:
+ * @param  *test_ct:
  * @retval None
  */
-void test_wrong_addr_port(char *url, long port, int num, 
+void test_wrong_addr_port(char *url, long port, int num,
     char *test_contents)
 {
     int i = 0;
     int num_errors = 0;
     int sockfd;
 
-    for(i=0; i < num; i++) {  
+    for (i = 0; i < num; i++) {
         sockfd = connect_to_server(url, port);
         printf("\nChecking whether connect_to_server returns -1 "
-               "for the wrong address or port...");
-        if(sockfd == -1) {
+            "for the wrong address or port...");
+        if (sockfd == -1) {
             printf(" - OK!\n");
-        } else {
+        }
+        else {
             printf(" - FAILED!\n");
             num_errors++;
             continue;
@@ -72,21 +73,22 @@ void test_wrong_addr_port(char *url, long port, int num,
 }
 
 
-void test_correct_addr_port(char *url, long port, int num, 
-    char *test_contents) 
+void test_correct_addr_port(char *url, long port, int num,
+    char *test_contents)
 {
     int i = 0;
     int num_errors = 0;
     int sockfd;
-    
 
-    for(i=0; i < num; i++) {  
+
+    for (i = 0; i < num; i++) {
         sockfd = connect_to_server(url, port);
         printf("\nChecking whether connection to the correct address"
-               " (%s:%lu) succeeds...", url, port);
+            " (%s:%lu) succeeds...", url, port);
         if (sockfd >= 0) {
             printf(" - OK!\n");
-        } else {
+        }
+        else {
             printf(" - FAILED! \n");
             num_errors++;
             continue;
@@ -98,7 +100,8 @@ void test_correct_addr_port(char *url, long port, int num,
 
     if (num_errors > 0) {
         printf("\nThere were %d error(s) out of %d tests.\n", num_errors, num);
-    } else {
+    }
+    else {
         printf("\nAll %d tests have been performed successfully.\n", num);
     }
     printf("================================================\n\n");
@@ -108,15 +111,15 @@ void test_correct_addr_port(char *url, long port, int num,
 int main(int argc, char **argv)
 {
     int status = 0;
-    char *url = (argc > 0 && argv[1])?argv[1]: "127.0.0.1";
+    char *url = (argc > 0 && argv[1]) ? argv[1] : "127.0.0.1";
     long port = 50001;
-    int num = 10;    
+    int num = 10;
     setup_logger("TESTSOCK", "./logs-socket.log");
     printf("\ntest_request testing has been started... \n\n");
-    
+
     test_wrong_addr_port("non-existent?!!!URL?", 0, num, "AAA");
     test_correct_addr_port(url, port, num, "AAA");
-    
+
     printf("\ntest_request testing has been finished... \n\n");
 
     return status;
